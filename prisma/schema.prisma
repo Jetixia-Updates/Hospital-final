@@ -1,0 +1,615 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// CORE ENTITIES - المعلومات الأساسية
+// ============================================
+
+model Patient {
+  id                String   @id @default(cuid())
+  mrn               String   @unique // Medical Record Number
+  firstName         String
+  lastName          String
+  dateOfBirth       DateTime
+  gender            String
+  bloodType         String?
+  phone             String
+  email             String?
+  address           String?
+  emergencyContact  String?
+  emergencyPhone    String?
+  nationalId        String?  @unique
+  
+  // Insurance Information
+  insuranceId       String?
+  insuranceProvider String?
+  insuranceStatus   String?  @default("active")
+  
+  // Status
+  status            String   @default("active") // active, discharged, deceased
+  admissionDate     DateTime @default(now())
+  dischargeDate     DateTime?
+  
+  // Relationships
+  appointments      Appointment[]
+  medicalRecords    MedicalRecord[]
+  prescriptions     Prescription[]
+  labTests          LabTest[]
+  surgeries         Surgery[]
+  bills             Bill[]
+  insuranceClaims   InsuranceClaim[]
+  meals             MealOrder[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([mrn])
+  @@index([nationalId])
+}
+
+model Staff {
+  id                String   @id @default(cuid())
+  employeeId        String   @unique
+  firstName         String
+  lastName          String
+  email             String   @unique
+  phone             String
+  dateOfBirth       DateTime
+  gender            String
+  nationalId        String?  @unique
+  
+  // Employment Details
+  department        String
+  position          String
+  specialization    String?
+  licenseNumber     String?
+  hireDate          DateTime
+  employmentType    String   // full-time, part-time, contract
+  status            String   @default("active") // active, on-leave, resigned
+  
+  // Compensation
+  salary            Float
+  allowances        Float?   @default(0)
+  
+  // Contact
+  address           String?
+  emergencyContact  String?
+  emergencyPhone    String?
+  
+  // Relationships
+  appointments      Appointment[]
+  medicalRecords    MedicalRecord[]
+  prescriptions     Prescription[]
+  surgeries         Surgery[]
+  attendance        Attendance[]
+  leaveRequests     LeaveRequest[]
+  payrolls          Payroll[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([employeeId])
+  @@index([department])
+}
+
+// ============================================
+// APPOINTMENTS & MEDICAL RECORDS
+// ============================================
+
+model Appointment {
+  id                String   @id @default(cuid())
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  doctorId          String
+  doctor            Staff    @relation(fields: [doctorId], references: [id])
+  
+  appointmentDate   DateTime
+  appointmentTime   String
+  duration          Int      @default(30) // minutes
+  type              String   // consultation, follow-up, emergency
+  department        String
+  reason            String?
+  status            String   @default("scheduled") // scheduled, completed, cancelled, no-show
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([appointmentDate])
+}
+
+model MedicalRecord {
+  id                String   @id @default(cuid())
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  doctorId          String
+  doctor            Staff    @relation(fields: [doctorId], references: [id])
+  
+  visitDate         DateTime @default(now())
+  chiefComplaint    String
+  diagnosis         String
+  symptoms          String?
+  vitalSigns        Json?    // { bp, temp, pulse, respiratoryRate, oxygenSat }
+  examination       String?
+  treatment         String?
+  notes             String?
+  followUpDate      DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([doctorId])
+}
+
+// ============================================
+// PHARMACY
+// ============================================
+
+model Medicine {
+  id                String   @id @default(cuid())
+  name              String
+  genericName       String?
+  category          String
+  manufacturer      String?
+  dosageForm        String   // tablet, capsule, syrup, injection
+  strength          String
+  
+  // Inventory
+  quantity          Int      @default(0)
+  minStockLevel     Int      @default(10)
+  reorderLevel      Int      @default(20)
+  unitPrice         Float
+  expiryDate        DateTime?
+  
+  // Status
+  status            String   @default("active") // active, discontinued, out-of-stock
+  location          String?  // shelf/storage location
+  
+  // Relationships
+  prescriptions     PrescriptionItem[]
+  dispensings       DispensingRecord[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([name])
+  @@index([category])
+}
+
+model Prescription {
+  id                String   @id @default(cuid())
+  prescriptionNumber String  @unique
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  doctorId          String
+  doctor            Staff    @relation(fields: [doctorId], references: [id])
+  
+  prescriptionDate  DateTime @default(now())
+  status            String   @default("pending") // pending, dispensed, cancelled
+  notes             String?
+  
+  items             PrescriptionItem[]
+  dispensings       DispensingRecord[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([prescriptionNumber])
+}
+
+model PrescriptionItem {
+  id                String   @id @default(cuid())
+  prescriptionId    String
+  prescription      Prescription @relation(fields: [prescriptionId], references: [id])
+  medicineId        String
+  medicine          Medicine @relation(fields: [medicineId], references: [id])
+  
+  dosage            String
+  frequency         String
+  duration          String
+  quantity          Int
+  instructions      String?
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([prescriptionId])
+  @@index([medicineId])
+}
+
+model DispensingRecord {
+  id                String   @id @default(cuid())
+  prescriptionId    String
+  prescription      Prescription @relation(fields: [prescriptionId], references: [id])
+  medicineId        String
+  medicine          Medicine @relation(fields: [medicineId], references: [id])
+  patientId         String
+  
+  quantityDispensed Int
+  dispensedBy       String   // pharmacist name/id
+  dispensedDate     DateTime @default(now())
+  insuranceCovered  Boolean  @default(false)
+  copayAmount       Float?
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([prescriptionId])
+  @@index([medicineId])
+}
+
+// ============================================
+// LABORATORY
+// ============================================
+
+model LabTest {
+  id                String   @id @default(cuid())
+  testNumber        String   @unique
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  
+  testType          String
+  testName          String
+  category          String   // hematology, biochemistry, microbiology, etc.
+  orderedDate       DateTime @default(now())
+  sampleCollected   DateTime?
+  reportDate        DateTime?
+  
+  status            String   @default("ordered") // ordered, collected, processing, completed
+  priority          String   @default("routine") // routine, urgent, stat
+  
+  results           Json?
+  normalRange       String?
+  interpretation    String?
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([testNumber])
+}
+
+// ============================================
+// SURGERY
+// ============================================
+
+model Surgery {
+  id                String   @id @default(cuid())
+  surgeryNumber     String   @unique
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  surgeonId         String
+  surgeon           Staff    @relation(fields: [surgeonId], references: [id])
+  
+  surgeryType       String
+  surgeryName       String
+  department        String
+  scheduledDate     DateTime
+  scheduledTime     String
+  duration          Int?     // minutes
+  
+  operatingRoom     String
+  anesthesiaType    String?
+  priority          String   @default("elective") // emergency, urgent, elective
+  status            String   @default("scheduled") // scheduled, in-progress, completed, cancelled
+  
+  preOpNotes        String?
+  postOpNotes       String?
+  complications     String?
+  outcome           String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([surgeonId])
+  @@index([scheduledDate])
+}
+
+// ============================================
+// FINANCE & BILLING
+// ============================================
+
+model Bill {
+  id                String   @id @default(cuid())
+  billNumber        String   @unique
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  
+  billDate          DateTime @default(now())
+  dueDate           DateTime?
+  totalAmount       Float
+  paidAmount        Float    @default(0)
+  remainingAmount   Float
+  discount          Float?   @default(0)
+  tax               Float?   @default(0)
+  
+  status            String   @default("pending") // pending, partial, paid, overdue
+  paymentMethod     String?  // cash, card, insurance, bank-transfer
+  
+  items             BillItem[]
+  payments          Payment[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([billNumber])
+}
+
+model BillItem {
+  id                String   @id @default(cuid())
+  billId            String
+  bill              Bill     @relation(fields: [billId], references: [id])
+  
+  description       String
+  category          String   // consultation, medication, lab, surgery, room
+  quantity          Int      @default(1)
+  unitPrice         Float
+  totalPrice        Float
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([billId])
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  billId            String
+  bill              Bill     @relation(fields: [billId], references: [id])
+  
+  paymentDate       DateTime @default(now())
+  amount            Float
+  paymentMethod     String
+  transactionId     String?
+  notes             String?
+  receivedBy        String
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([billId])
+}
+
+// ============================================
+// INSURANCE
+// ============================================
+
+model InsuranceClaim {
+  id                String   @id @default(cuid())
+  claimNumber       String   @unique
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  
+  insuranceProvider String
+  policyNumber      String
+  claimDate         DateTime @default(now())
+  serviceDate       DateTime
+  
+  totalAmount       Float
+  approvedAmount    Float?
+  copayAmount       Float?
+  deductible        Float?
+  
+  status            String   @default("submitted") // submitted, under-review, approved, rejected, paid
+  diagnosis         String
+  treatment         String
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([claimNumber])
+}
+
+// ============================================
+// KITCHEN / NUTRITION
+// ============================================
+
+model MealOrder {
+  id                String   @id @default(cuid())
+  orderNumber       String   @unique
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  
+  mealType          String   // breakfast, lunch, dinner, snack
+  dietType          String   // regular, diabetic, low-sodium, vegetarian, etc.
+  orderDate         DateTime @default(now())
+  deliveryDate      DateTime
+  deliveryTime      String
+  
+  status            String   @default("pending") // pending, preparing, delivered, cancelled
+  specialInstructions String?
+  allergies         String?
+  
+  items             MealItem[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([patientId])
+  @@index([orderNumber])
+}
+
+model MealItem {
+  id                String   @id @default(cuid())
+  mealOrderId       String
+  mealOrder         MealOrder @relation(fields: [mealOrderId], references: [id])
+  
+  itemName          String
+  portion           String
+  calories          Int?
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([mealOrderId])
+}
+
+model MenuItem {
+  id                String   @id @default(cuid())
+  name              String
+  category          String   // main-course, side-dish, beverage, dessert
+  dietType          String   // regular, diabetic, low-sodium, etc.
+  
+  description       String?
+  ingredients       String?
+  calories          Int?
+  protein           Float?
+  carbs             Float?
+  fat               Float?
+  
+  available         Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([category])
+  @@index([dietType])
+}
+
+// ============================================
+// HR & PAYROLL
+// ============================================
+
+model Attendance {
+  id                String   @id @default(cuid())
+  staffId           String
+  staff             Staff    @relation(fields: [staffId], references: [id])
+  
+  date              DateTime
+  checkIn           DateTime?
+  checkOut          DateTime?
+  status            String   // present, absent, late, half-day, on-leave
+  workHours         Float?
+  overtime          Float?   @default(0)
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([staffId, date])
+  @@index([staffId])
+  @@index([date])
+}
+
+model LeaveRequest {
+  id                String   @id @default(cuid())
+  staffId           String
+  staff             Staff    @relation(fields: [staffId], references: [id])
+  
+  leaveType         String   // annual, sick, emergency, unpaid
+  startDate         DateTime
+  endDate           DateTime
+  days              Int
+  reason            String?
+  status            String   @default("pending") // pending, approved, rejected
+  approvedBy        String?
+  approvalDate      DateTime?
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([staffId])
+  @@index([status])
+}
+
+model Payroll {
+  id                String   @id @default(cuid())
+  staffId           String
+  staff             Staff    @relation(fields: [staffId], references: [id])
+  
+  month             String   // YYYY-MM
+  basicSalary       Float
+  allowances        Float    @default(0)
+  overtime          Float    @default(0)
+  deductions        Float    @default(0)
+  netSalary         Float
+  
+  status            String   @default("pending") // pending, processed, paid
+  paymentDate       DateTime?
+  paymentMethod     String?
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([staffId, month])
+  @@index([staffId])
+  @@index([month])
+}
+
+// ============================================
+// SUPPLY CHAIN & INVENTORY
+// ============================================
+
+model InventoryItem {
+  id                String   @id @default(cuid())
+  itemCode          String   @unique
+  name              String
+  category          String   // medical-supplies, equipment, consumables, etc.
+  description       String?
+  
+  quantity          Int      @default(0)
+  unit              String   // pieces, boxes, liters, etc.
+  minStockLevel     Int
+  reorderLevel      Int
+  
+  unitPrice         Float
+  supplier          String?
+  location          String?
+  
+  status            String   @default("active") // active, discontinued, out-of-stock
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([itemCode])
+  @@index([category])
+}
+
+// ============================================
+// MAINTENANCE
+// ============================================
+
+model MaintenanceRequest {
+  id                String   @id @default(cuid())
+  requestNumber     String   @unique
+  
+  equipment         String
+  location          String
+  department        String
+  issueType         String   // repair, inspection, replacement, cleaning
+  priority          String   @default("medium") // low, medium, high, urgent
+  description       String
+  
+  reportedBy        String
+  reportedDate      DateTime @default(now())
+  assignedTo        String?
+  scheduledDate     DateTime?
+  completedDate     DateTime?
+  
+  status            String   @default("pending") // pending, in-progress, completed, cancelled
+  notes             String?
+  cost              Float?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([requestNumber])
+  @@index([status])
+}
