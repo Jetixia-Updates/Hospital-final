@@ -1,0 +1,753 @@
+import Layout from "@/components/Layout";
+import {
+  Building2,
+  Heart,
+  Brain,
+  Bone,
+  Eye,
+  Baby,
+  Users,
+  Bed,
+  Activity,
+  Phone,
+  MapPin,
+  Plus,
+  Search,
+  CheckCircle2,
+  Stethoscope,
+  TrendingUp,
+  DollarSign,
+  Calendar,
+  AlertCircle,
+  Target,
+  Award,
+  BarChart3,
+  FileText,
+  Zap,
+  Shield,
+} from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+export default function Departments() {
+  const { t } = useTranslation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const departments = [
+    {
+      id: "DEPT001",
+      name: "Cardiology",
+      head: "Dr. Hassan Al-Rashid",
+      beds: 24,
+      occupiedBeds: 18,
+      staff: { doctors: 8, nurses: 16, technicians: 4, admin: 2 },
+      phone: "+966 11 234 5678",
+      location: "Building A, Floor 3",
+      services: ["ECG", "Echo", "Cardiac Catheterization", "Angiography", "Pacemaker"],
+      equipment: ["ECG Machines (5)", "Echo (3)", "Cath Lab (2)"],
+      monthlyPatients: 450,
+      icon: Heart,
+    },
+    {
+      id: "DEPT002",
+      name: "Neurology",
+      head: "Dr. Fatima Al-Dosari",
+      beds: 18,
+      occupiedBeds: 12,
+      staff: { doctors: 6, nurses: 12, technicians: 3, admin: 2 },
+      phone: "+966 11 234 5679",
+      location: "Building B, Floor 2",
+      services: ["Brain Surgery", "Spine Surgery", "EEG", "Stroke Management"],
+      equipment: ["MRI (1)", "CT Scanner (1)", "EEG (4)"],
+      monthlyPatients: 320,
+      icon: Brain,
+    },
+    {
+      id: "DEPT003",
+      name: "Orthopedics",
+      head: "Dr. Mohammed Al-Harbi",
+      beds: 22,
+      occupiedBeds: 19,
+      staff: { doctors: 7, nurses: 14, physiotherapists: 5, admin: 2 },
+      phone: "+966 11 234 5680",
+      location: "Building C, Floor 1",
+      services: ["Fracture Treatment", "Joint Replacement", "Arthroscopy"],
+      equipment: ["X-Ray (3)", "C-Arm (2)", "Physical Therapy Units"],
+      monthlyPatients: 580,
+      icon: Bone,
+    },
+    {
+      id: "DEPT004",
+      name: "Ophthalmology",
+      head: "Dr. Layla Mahmoud",
+      beds: 12,
+      occupiedBeds: 7,
+      staff: { doctors: 5, nurses: 8, optometrists: 3, admin: 1 },
+      phone: "+966 11 234 5681",
+      location: "Building A, Floor 2",
+      services: ["Cataract Surgery", "LASIK", "Retinal Surgery", "Glaucoma"],
+      equipment: ["Phaco (2)", "LASIK Laser", "OCT (2)"],
+      monthlyPatients: 720,
+      icon: Eye,
+    },
+    {
+      id: "DEPT005",
+      name: "Pediatrics",
+      head: "Dr. Noor Abdullah",
+      beds: 30,
+      occupiedBeds: 22,
+      staff: { doctors: 10, nurses: 20, neonatologists: 3, admin: 2 },
+      phone: "+966 11 234 5682",
+      location: "Building D, Floors 1-2",
+      services: ["Neonatal Care", "Emergency", "Vaccination", "NICU"],
+      equipment: ["Incubators (15)", "Ventilators (8)", "Monitors (30)"],
+      monthlyPatients: 890,
+      icon: Baby,
+    },
+    {
+      id: "DEPT006",
+      name: "Internal Medicine",
+      head: "Dr. Khalid Omar",
+      beds: 28,
+      occupiedBeds: 20,
+      staff: { doctors: 9, nurses: 18, technicians: 3, admin: 2 },
+      phone: "+966 11 234 5683",
+      location: "Building A, Floor 4",
+      services: ["Diabetes", "Hypertension", "Gastroenterology", "Nephrology"],
+      equipment: ["Dialysis (6)", "Endoscopy (2)", "ECG (4)"],
+      monthlyPatients: 650,
+      icon: Stethoscope,
+    },
+  ];
+
+  const filteredDepartments = departments.filter((dept) =>
+    dept.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const bedOccupancy = {
+    total: departments.reduce((sum, dept) => sum + dept.beds, 0),
+    occupied: departments.reduce((sum, dept) => sum + dept.occupiedBeds, 0),
+  };
+
+  const totalStaff = departments.reduce((sum, dept) => {
+    return sum + Object.values(dept.staff).reduce((a, b) => a + (b as number), 0);
+  }, 0);
+
+  // Performance metrics
+  const performanceMetrics = departments.map(dept => ({
+    name: dept.name,
+    patientSatisfaction: Math.floor(Math.random() * 15) + 85,
+    avgWaitTime: Math.floor(Math.random() * 30) + 15,
+    treatmentSuccess: Math.floor(Math.random() * 10) + 90,
+    efficiency: Math.floor(Math.random() * 15) + 85,
+  }));
+
+  // Financial data
+  const financialData = departments.map(dept => ({
+    name: dept.name,
+    revenue: Math.floor(Math.random() * 500000) + 300000,
+    expenses: Math.floor(Math.random() * 300000) + 200000,
+    budget: Math.floor(Math.random() * 600000) + 400000,
+  }));
+
+  // Schedule data
+  const scheduleData = [
+    { day: "الأحد", cardiology: 45, neurology: 32, orthopedics: 58, ophthalmology: 72, pediatrics: 89, internal: 65 },
+    { day: "الإثنين", cardiology: 52, neurology: 38, orthopedics: 61, ophthalmology: 68, pediatrics: 85, internal: 70 },
+    { day: "الثلاثاء", cardiology: 48, neurology: 35, orthopedics: 55, ophthalmology: 75, pediatrics: 92, internal: 68 },
+    { day: "الأربعاء", cardiology: 50, neurology: 40, orthopedics: 62, ophthalmology: 70, pediatrics: 88, internal: 72 },
+    { day: "الخميس", cardiology: 46, neurology: 36, orthopedics: 59, ophthalmology: 73, pediatrics: 90, internal: 67 },
+  ];
+
+  // Quality metrics
+  const qualityMetrics = [
+    { department: "Cardiology", infections: 1.2, mortality: 2.3, readmissions: 8.5, complications: 3.2 },
+    { department: "Neurology", infections: 0.8, mortality: 3.1, readmissions: 7.2, complications: 2.8 },
+    { department: "Orthopedics", infections: 1.5, mortality: 0.5, readmissions: 9.8, complications: 4.1 },
+    { department: "Ophthalmology", infections: 0.3, mortality: 0.1, readmissions: 2.5, complications: 1.2 },
+    { department: "Pediatrics", infections: 1.8, mortality: 1.2, readmissions: 6.8, complications: 2.5 },
+    { department: "Internal Medicine", infections: 1.1, mortality: 2.8, readmissions: 8.2, complications: 3.5 },
+  ];
+
+  return (
+    <Layout>
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-purple-50 rounded-2xl p-8 border border-slate-200 shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                {t('departments.comprehensiveManagement')}
+              </h1>
+              <p className="text-slate-600 text-lg">{t('departments.departmentsDescription')}</p>
+            </div>
+            <div className="flex gap-3">
+              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg">
+                <Plus className="w-4 h-4" />
+                {t('departments.newDepartment')}
+              </Button>
+              <Button variant="outline" className="gap-2 border-2 shadow-md">
+                <FileText className="w-4 h-4" />
+                {t('departments.comprehensiveReport')}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-700 mb-1">{t('departments.totalDepartments')}</p>
+                  <p className="text-3xl font-bold text-blue-900">{departments.length}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge className="bg-green-100 text-green-700 border-0">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      {t('departments.allActive')}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="w-14 h-14 bg-white/50 rounded-xl flex items-center justify-center">
+                  <Building2 className="w-8 h-8 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-700 mb-1">{t('departments.totalBeds')}</p>
+                  <p className="text-3xl font-bold text-purple-900">{bedOccupancy.total}</p>
+                  <p className="text-sm text-purple-600 mt-2">
+                    {bedOccupancy.occupied} {t('departments.occupied')} • {Math.round((bedOccupancy.occupied / bedOccupancy.total) * 100)}%
+                  </p>
+                </div>
+                <div className="w-14 h-14 bg-white/50 rounded-xl flex items-center justify-center">
+                  <Bed className="w-8 h-8 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-700 mb-1">{t('departments.totalStaff')}</p>
+                  <p className="text-3xl font-bold text-green-900">{totalStaff}</p>
+                  <p className="text-sm text-green-600 mt-2">{t('departments.distributedAcross')} {departments.length} {t('departments.departments')}</p>
+                </div>
+                <div className="w-14 h-14 bg-white/50 rounded-xl flex items-center justify-center">
+                  <Users className="w-8 h-8 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-orange-200 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-700 mb-1">{t('departments.patientsMonth')}</p>
+                  <p className="text-3xl font-bold text-orange-900">
+                    {departments.reduce((sum, d) => sum + d.monthlyPatients, 0).toLocaleString()}
+                  </p>
+                  <div className="flex items-center gap-1 mt-2">
+                    <TrendingUp className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-green-600 font-medium">↑ 8.2%</span>
+                  </div>
+                </div>
+                <div className="w-14 h-14 bg-white/50 rounded-xl flex items-center justify-center">
+                  <Activity className="w-8 h-8 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-white/80 backdrop-blur-md border border-slate-200 shadow-lg p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white">
+              <Building2 className="w-4 h-4 mr-2" />
+              {t('departments.overview')}
+            </TabsTrigger>
+            <TabsTrigger value="capacity" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white">
+              <Bed className="w-4 h-4 mr-2" />
+              {t('departments.capacity')}
+            </TabsTrigger>
+            <TabsTrigger value="staff" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white">
+              <Users className="w-4 h-4 mr-2" />
+              {t('departments.staffDistribution')}
+            </TabsTrigger>
+            <TabsTrigger value="services" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-red-600 data-[state=active]:text-white">
+              <Stethoscope className="w-4 h-4 mr-2" />
+              {t('departments.services')}
+            </TabsTrigger>
+            <TabsTrigger value="performance" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600 data-[state=active]:to-orange-600 data-[state=active]:text-white">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              {t('common.analytics')}
+            </TabsTrigger>
+            <TabsTrigger value="financial" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600 data-[state=active]:to-teal-600 data-[state=active]:text-white">
+              <DollarSign className="w-4 h-4 mr-2" />
+              {t('navigation.finance')}
+            </TabsTrigger>
+            <TabsTrigger value="schedule" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white">
+              <Calendar className="w-4 h-4 mr-2" />
+              {t('departments.weeklySchedule')}
+            </TabsTrigger>
+            <TabsTrigger value="quality" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-600 data-[state=active]:to-pink-600 data-[state=active]:text-white">
+              <Award className="w-4 h-4 mr-2" />
+              {t('departments.qualitySafety')}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{t('departments.allDepartments')}</CardTitle>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder={t('common.search')}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredDepartments.map((dept) => {
+                    const Icon = dept.icon;
+                    const occupancy = Math.round((dept.occupiedBeds / dept.beds) * 100);
+                    const totalStaffCount = Object.values(dept.staff).reduce((a, b) => a + (b as number), 0);
+                    
+                    return (
+                      <div key={dept.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <Icon className="w-6 h-6 text-blue-600" />
+                          </div>
+                          <Badge>{t('departments.active')}</Badge>
+                        </div>
+                        <h3 className="font-semibold text-slate-900 mb-1">{dept.name}</h3>
+                        <p className="text-sm text-slate-600 mb-3">{dept.head}</p>
+                        <div className="space-y-2 text-sm mb-3">
+                          <div className="flex justify-between">
+                            <span className="text-slate-600">{t('departments.beds')}</span>
+                            <span className="font-medium">{dept.occupiedBeds}/{dept.beds}</span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${occupancy}%` }} />
+                          </div>
+                          <div className="flex justify-between pt-1">
+                            <span className="text-slate-600">{t('departments.totalStaff')}</span>
+                            <span className="font-medium">{totalStaffCount}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-3 border-t text-xs text-slate-600">
+                          <MapPin className="w-3 h-3" />
+                          {dept.location}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="capacity" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('departments.capacityOccupancy')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {departments.map((dept) => {
+                    const occupancy = Math.round((dept.occupiedBeds / dept.beds) * 100);
+                    return (
+                      <div key={dept.id} className="border rounded-lg p-4">
+                        <div className="flex justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold">{dept.name}</h4>
+                            <p className="text-sm text-slate-600">{dept.location}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">{dept.occupiedBeds}/{dept.beds} {t('departments.beds')}</p>
+                            <p className="text-xs text-slate-600">{occupancy}% {t('departments.occupied')}</p>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-3">
+                          <div 
+                            className={`h-3 rounded-full ${occupancy > 85 ? 'bg-red-600' : occupancy > 70 ? 'bg-orange-600' : 'bg-green-600'}`}
+                            style={{ width: `${occupancy}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="staff" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('departments.staffDistribution')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {departments.map((dept) => (
+                    <div key={dept.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between mb-4">
+                        <h4 className="font-semibold">{dept.name}</h4>
+                        <Badge variant="outline">
+                          {Object.values(dept.staff).reduce((a, b) => a + (b as number), 0)} {t('departments.totalStaffCount')}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {Object.entries(dept.staff).map(([role, count]) => (
+                          <div key={role} className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-slate-600 capitalize mb-1">{role}</p>
+                            <p className="text-lg font-bold">{count}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="services" className="space-y-4">
+            <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Stethoscope className="w-5 h-5 text-blue-600" />
+                  {t('departments.servicesEquipment')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {departments.map((dept) => (
+                    <div key={dept.id} className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                      <div className="flex justify-between mb-4">
+                        <h4 className="font-bold text-slate-900 text-lg">{dept.name}</h4>
+                        <Badge className="bg-blue-100 text-blue-700 border-0">
+                          {dept.monthlyPatients} {t('departments.patientsPerMonth')}
+                        </Badge>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <p className="text-sm font-semibold mb-3 text-slate-700">{t('departments.availableServices')}</p>
+                          <ul className="space-y-2">
+                            {dept.services.map((s, i) => (
+                              <li key={i} className="text-sm text-slate-600 flex gap-2 items-start">
+                                <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold mb-3 text-slate-700">{t('departments.equipmentDevices')}</p>
+                          <ul className="space-y-2">
+                            {dept.equipment.map((e, i) => (
+                              <li key={i} className="text-sm text-slate-600 flex gap-2 items-start">
+                                <Activity className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                                {e}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-slate-300 flex flex-wrap gap-4 text-sm text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-blue-600" />
+                          {dept.phone}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-blue-600" />
+                          {dept.location}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="performance" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  {t('departments.kpiMetrics')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {performanceMetrics.map((metric, index) => (
+                    <div key={index} className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                      <h4 className="font-bold text-slate-900 mb-4">{metric.name}</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
+                          <p className="text-xs text-blue-600 mb-1">{t('departments.patientSatisfaction')}</p>
+                          <p className="text-2xl font-bold text-blue-700">{metric.patientSatisfaction}%</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200">
+                          <p className="text-xs text-orange-600 mb-1">{t('departments.avgWaitTime')}</p>
+                          <p className="text-2xl font-bold text-orange-700">{metric.avgWaitTime} {t('departments.minutes')}</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+                          <p className="text-xs text-green-600 mb-1">{t('departments.treatmentSuccess')}</p>
+                          <p className="text-2xl font-bold text-green-700">{metric.treatmentSuccess}%</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                          <p className="text-xs text-purple-600 mb-1">{t('departments.efficiency')}</p>
+                          <p className="text-2xl font-bold text-purple-700">{metric.efficiency}%</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="financial" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-blue-600" />
+                  {t('departments.financialReports')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {financialData.map((data, index) => (
+                    <div key={index} className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-bold text-slate-900">{data.name}</h4>
+                        <Badge className={data.revenue > data.expenses ? "bg-green-100 text-green-700 border-0" : "bg-orange-100 text-orange-700 border-0"}>
+                          {data.revenue > data.expenses ? t('departments.profit') : t('departments.loss')}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.revenues')}</p>
+                          <p className="text-xl font-bold text-green-600">{data.revenue.toLocaleString()} ر.س</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.expenses')}</p>
+                          <p className="text-xl font-bold text-red-600">{data.expenses.toLocaleString()} ر.س</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.budget')}</p>
+                          <p className="text-xl font-bold text-blue-600">{data.budget.toLocaleString()} ر.س</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-slate-300">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-600">{t('departments.netProfitLoss')}</span>
+                          <span className={`font-bold ${data.revenue > data.expenses ? 'text-green-600' : 'text-red-600'}`}>
+                            {(data.revenue - data.expenses).toLocaleString()} ر.س
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <CardContent className="pt-6 text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <TrendingUp className="w-6 h-6 text-green-600" />
+                  </div>
+                  <p className="text-sm text-green-700 mb-1">{t('departments.totalRevenues')}</p>
+                  <p className="text-3xl font-bold text-green-700">
+                    {financialData.reduce((sum, d) => sum + d.revenue, 0).toLocaleString()} ر.س
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200">
+                <CardContent className="pt-6 text-center">
+                  <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <AlertCircle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <p className="text-sm text-red-700 mb-1">{t('departments.totalExpensesLabel')}</p>
+                  <p className="text-3xl font-bold text-red-700">
+                    {financialData.reduce((sum, d) => sum + d.expenses, 0).toLocaleString()} ر.س
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+                <CardContent className="pt-6 text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Target className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <p className="text-sm text-blue-700 mb-1">{t('departments.netProfits')}</p>
+                  <p className="text-3xl font-bold text-blue-700">
+                    {(financialData.reduce((sum, d) => sum + d.revenue, 0) - financialData.reduce((sum, d) => sum + d.expenses, 0)).toLocaleString()} ر.س
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="schedule" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  {t('departments.weeklySchedule')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {scheduleData.map((day, index) => (
+                    <div key={index} className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                      <h4 className="font-bold text-slate-900 mb-4">{day.day}</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div className="bg-white p-3 rounded-lg border border-red-200">
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.heart')}</p>
+                          <p className="text-xl font-bold text-red-600">{day.cardiology}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border border-purple-200">
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.neurology')}</p>
+                          <p className="text-xl font-bold text-purple-600">{day.neurology}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border border-blue-200">
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.bones')}</p>
+                          <p className="text-xl font-bold text-blue-600">{day.orthopedics}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border border-green-200">
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.eyes')}</p>
+                          <p className="text-xl font-bold text-green-600">{day.ophthalmology}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border border-yellow-200">
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.children')}</p>
+                          <p className="text-xl font-bold text-yellow-600">{day.pediatrics}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border border-cyan-200">
+                          <p className="text-xs text-slate-600 mb-1">{t('departments.internal')}</p>
+                          <p className="text-xl font-bold text-cyan-600">{day.internal}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="quality" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-blue-600" />
+                  {t('departments.qualitySafety')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {qualityMetrics.map((metric, index) => (
+                    <div key={index} className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                      <h4 className="font-bold text-slate-900 mb-4">{metric.department}</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border border-yellow-200">
+                          <p className="text-xs text-yellow-700 mb-1">{t('departments.infectionRate')}</p>
+                          <p className="text-2xl font-bold text-yellow-700">{metric.infections}%</p>
+                          <Badge className="mt-2 bg-yellow-100 text-yellow-700 border-0 text-xs">
+                            {metric.infections < 1.5 ? t('departments.excellent') : t('departments.good')}
+                          </Badge>
+                        </div>
+                        <div className="bg-gradient-to-br from-red-50 to-pink-50 p-4 rounded-lg border border-red-200">
+                          <p className="text-xs text-red-700 mb-1">{t('departments.mortalityRate')}</p>
+                          <p className="text-2xl font-bold text-red-700">{metric.mortality}%</p>
+                          <Badge className="mt-2 bg-red-100 text-red-700 border-0 text-xs">
+                            {metric.mortality < 2 ? t('departments.excellent') : t('departments.good')}
+                          </Badge>
+                        </div>
+                        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200">
+                          <p className="text-xs text-orange-700 mb-1">{t('departments.readmissionRate')}</p>
+                          <p className="text-2xl font-bold text-orange-700">{metric.readmissions}%</p>
+                          <Badge className="mt-2 bg-orange-100 text-orange-700 border-0 text-xs">
+                            {metric.readmissions < 8 ? t('departments.excellent') : t('departments.good')}
+                          </Badge>
+                        </div>
+                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
+                          <p className="text-xs text-blue-700 mb-1">{t('departments.complicationsRate')}</p>
+                          <p className="text-2xl font-bold text-blue-700">{metric.complications}%</p>
+                          <Badge className="mt-2 bg-blue-100 text-blue-700 border-0 text-xs">
+                            {metric.complications < 3 ? t('departments.excellent') : t('departments.good')}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <CardContent className="pt-6 text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Shield className="w-6 h-6 text-green-600" />
+                  </div>
+                  <p className="text-sm text-green-700 mb-1">{t('departments.avgQualityRate')}</p>
+                  <p className="text-3xl font-bold text-green-700">94.5%</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+                <CardContent className="pt-6 text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle2 className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <p className="text-sm text-blue-700 mb-1">{t('departments.standardsCompliance')}</p>
+                  <p className="text-3xl font-bold text-blue-700">98.2%</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+                <CardContent className="pt-6 text-center">
+                  <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Zap className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <p className="text-sm text-yellow-700 mb-1">{t('departments.responseSpeed')}</p>
+                  <p className="text-3xl font-bold text-yellow-700">96.8%</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+                <CardContent className="pt-6 text-center">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Award className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <p className="text-sm text-purple-700 mb-1">{t('departments.overallRating')}</p>
+                  <p className="text-3xl font-bold text-purple-700">A+</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Layout>
+  );
+}
