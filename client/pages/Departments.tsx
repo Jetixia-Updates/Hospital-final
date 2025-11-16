@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import AddDepartmentForm from "@/components/AddDepartmentForm";
 import {
   Building2,
   Heart,
@@ -32,11 +33,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 export default function Departments() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const departments = [
     {
@@ -174,8 +177,24 @@ export default function Departments() {
     { department: "Internal Medicine", infections: 1.1, mortality: 2.8, readmissions: 8.2, complications: 3.5 },
   ];
 
+  const handleAddDepartment = (departmentData: any) => {
+    console.log("New department data:", departmentData);
+    toast({
+      title: t('common.success'),
+      description: `${t('departments.addDepartment')}: ${departmentData.nameAr}`,
+    });
+    setShowAddForm(false);
+  };
+
   return (
     <Layout>
+      {showAddForm && (
+        <AddDepartmentForm
+          onClose={() => setShowAddForm(false)}
+          onSubmit={handleAddDepartment}
+        />
+      )}
+      
       <div className="space-y-6">
         <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-purple-50 rounded-2xl p-8 border border-slate-200 shadow-xl">
           <div className="flex items-center justify-between">
@@ -186,7 +205,10 @@ export default function Departments() {
               <p className="text-slate-600 text-lg">{t('departments.departmentsDescription')}</p>
             </div>
             <div className="flex gap-3">
-              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg">
+              <Button 
+                onClick={() => setShowAddForm(true)}
+                className="gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg"
+              >
                 <Plus className="w-4 h-4" />
                 {t('departments.newDepartment')}
               </Button>

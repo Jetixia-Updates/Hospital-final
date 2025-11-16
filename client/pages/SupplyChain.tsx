@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Barcode,
+  ShoppingCart,
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

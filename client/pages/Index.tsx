@@ -28,6 +28,7 @@ import {
   BarChart3,
   UserCircle,
   DoorOpen,
+  UserPlus,
 } from "lucide-react";
 
 const QuickStatCard = ({
@@ -260,6 +261,13 @@ export default function Index() {
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">{t('dashboard.quickAccess')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <QuickAccessCard
+                  icon={UserPlus}
+                  title={t('navigation.reception')}
+                  count="143"
+                  path="/reception"
+                  color="bg-teal-600"
+                />
                 <QuickAccessCard
                   icon={Users}
                   title={t('navigation.patients')}

@@ -21,6 +21,7 @@ import {
   Briefcase,
   Wrench,
   Package,
+  PackageSearch,
   UtensilsCrossed,
   DollarSign,
   ChevronRight,
@@ -32,7 +33,10 @@ import {
   HelpCircle,
   Activity,
   Stethoscope,
-  AlertCircle
+  AlertCircle,
+  FlaskConical,
+  ScanLine,
+  UserPlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +51,8 @@ export default function Layout({ children }: LayoutProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notificationFilter, setNotificationFilter] = useState<"all" | "unread">("all");
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
   const [notifications, setNotifications] = useState([
     {
@@ -180,15 +185,19 @@ export default function Layout({ children }: LayoutProps) {
     {
       category: t('categories.clinicalServices'),
       items: [
+        { name: t('navigation.reception'), path: "/reception", icon: UserPlus },
         { name: t('navigation.patients'), path: "/patients", icon: Users },
         { name: t('navigation.departments'), path: "/departments", icon: Building2 },
         { name: t('navigation.clinics'), path: "/clinics", icon: Stethoscope },
         { name: t('navigation.emergency'), path: "/emergency", icon: AlertCircle },
         { name: t('navigation.rooms'), path: "/rooms", icon: DoorOpen },
         { name: t('navigation.medicalRecords'), path: "/medical-records", icon: FileText },
+        { name: t('navigation.laboratory'), path: "/laboratory", icon: FlaskConical },
+        { name: t('navigation.radiology'), path: "/radiology", icon: ScanLine },
         { name: t('navigation.surgery'), path: "/surgery", icon: Scissors },
         { name: t('navigation.pharmacy'), path: "/pharmacy", icon: Pill },
         { name: t('navigation.insurance'), path: "/insurance", icon: Shield },
+        { name: t('navigation.billing'), path: "/billing", icon: DollarSign },
       ],
     },
     {
@@ -201,6 +210,7 @@ export default function Layout({ children }: LayoutProps) {
     {
       category: t('categories.operations'),
       items: [
+        { name: t('navigation.warehouse'), path: "/warehouse", icon: PackageSearch },
         { name: t('navigation.maintenance'), path: "/maintenance", icon: Wrench },
         { name: t('navigation.supplyChain'), path: "/supply-chain", icon: Package },
         { name: t('navigation.kitchen'), path: "/kitchen", icon: UtensilsCrossed },
@@ -217,18 +227,20 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-screen glass border-r border-white/20 shadow-premium-lg transition-all duration-500 z-40 flex flex-col backdrop-blur-2xl",
+          "fixed top-0 h-screen glass shadow-premium-lg transition-all duration-500 z-40 flex flex-col backdrop-blur-2xl",
+          isRTL ? "right-0 border-l" : "left-0 border-r",
+          "border-white/20",
           isSidebarOpen ? "w-72" : "w-20"
         )}
       >
         {/* Logo & Toggle */}
         <div className="flex items-center justify-between p-5 border-b border-white/20 flex-shrink-0">
           {isSidebarOpen && (
-            <Link to="/" className="flex items-center space-x-3 group">
+            <Link to="/" className={cn("flex items-center group", isRTL ? "space-x-reverse space-x-3" : "space-x-3")}>
               <div className="w-11 h-11 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-premium group-hover:shadow-premium-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
                 <Activity className="w-6 h-6 text-white" strokeWidth={2.5} />
               </div>
@@ -250,7 +262,7 @@ export default function Layout({ children }: LayoutProps) {
               !isSidebarOpen && "hidden"
             )}
           >
-            {isSidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+            {isSidebarOpen ? (isRTL ? <ChevronRight size={18} /> : <ChevronLeft size={18} />) : (isRTL ? <ChevronLeft size={18} /> : <ChevronRight size={18} />)}
           </button>
         </div>
 
@@ -344,7 +356,9 @@ export default function Layout({ children }: LayoutProps) {
       <div
         className={cn(
           "flex-1 flex flex-col transition-all duration-300",
-          isSidebarOpen ? "ml-72" : "ml-20"
+          isRTL 
+            ? (isSidebarOpen ? "mr-72" : "mr-20")
+            : (isSidebarOpen ? "ml-72" : "ml-20")
         )}
       >
         {/* Header */}
@@ -353,11 +367,17 @@ export default function Layout({ children }: LayoutProps) {
             {/* Search Bar */}
             <div className="flex-1 max-w-2xl">
               <div className="relative group">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-all duration-500 group-focus-within:scale-110" size={20} strokeWidth={2.5} />
+                <Search className={cn(
+                  "absolute top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-all duration-500 group-focus-within:scale-110",
+                  isRTL ? "right-5" : "left-5"
+                )} size={20} strokeWidth={2.5} />
                 <input
                   type="text"
                   placeholder={t('header.searchPlaceholder')}
-                  className="w-full pl-14 pr-6 py-3.5 bg-white/50 border border-slate-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white shadow-sm focus:shadow-premium transition-all duration-500 placeholder:text-slate-400 font-medium"
+                  className={cn(
+                    "w-full py-3.5 bg-white/50 border border-slate-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white shadow-sm focus:shadow-premium transition-all duration-500 placeholder:text-slate-400 font-medium",
+                    isRTL ? "pr-14 pl-6" : "pl-14 pr-6"
+                  )}
                 />
               </div>
             </div>
@@ -391,7 +411,10 @@ export default function Layout({ children }: LayoutProps) {
                     />
                     
                     {/* Dropdown Panel */}
-                    <div className="absolute left-0 mt-2 w-[420px] bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-300">
+                    <div className={cn(
+                      "absolute mt-2 w-[420px] bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-300",
+                      isRTL ? "right-0" : "left-0"
+                    )}>
                       {/* Header */}
                       <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 px-6 py-4">
                         <div className="flex items-center justify-between mb-3">
@@ -491,7 +514,7 @@ export default function Layout({ children }: LayoutProps) {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-2 mb-1">
                                     <h4 className="font-bold text-slate-900 text-sm leading-tight">
-                                      {notification.title}
+                                      {i18n.language === 'en' ? notification.titleEn : notification.title}
                                     </h4>
                                     {!notification.read && (
                                       <span className="w-2.5 h-2.5 bg-blue-600 rounded-full flex-shrink-0 mt-1 animate-pulse shadow-lg shadow-blue-500/50"></span>
@@ -499,29 +522,29 @@ export default function Layout({ children }: LayoutProps) {
                                   </div>
                                   
                                   <p className="text-slate-600 text-sm mb-2 leading-relaxed">
-                                    {notification.message}
+                                    {i18n.language === 'en' ? notification.messageEn : notification.message}
                                   </p>
                                   
                                   <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-2 flex-wrap">
                                       <span className="text-xs text-slate-500 flex items-center gap-1">
                                         <Clock className="w-3 h-3" />
-                                        {notification.time}
+                                        {i18n.language === 'en' ? notification.timeEn : notification.time}
                                       </span>
                                       
                                       {notification.type === "urgent" && (
                                         <Badge variant="destructive" className="text-xs px-2 py-0 h-5">
-                                          عاجل
+                                          {t('common.urgent')}
                                         </Badge>
                                       )}
                                       {notification.type === "warning" && (
                                         <Badge className="text-xs border-orange-500 text-orange-700 bg-orange-50 px-2 py-0 h-5">
-                                          تحذير
+                                          {t('common.warning')}
                                         </Badge>
                                       )}
                                       {notification.type === "success" && (
                                         <Badge className="text-xs border-green-500 text-green-700 bg-green-50 px-2 py-0 h-5">
-                                          نجح
+                                          {t('common.success')}
                                         </Badge>
                                       )}
                                       

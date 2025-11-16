@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import OperatingRoomManagement from "@/components/OperatingRoomManagement";
 import {
   Search,
   Clock,
@@ -24,6 +25,7 @@ import {
   Package,
   DollarSign,
   BarChart3,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -36,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
 
 const SurgeryCard = ({
   id,
@@ -60,62 +63,63 @@ const SurgeryCard = ({
 }) => {
   const { t } = useTranslation();
   const statusConfig = {
-    scheduled: { bg: "bg-blue-50", badge: t('surgery.scheduled'), color: "text-blue-700" },
+    scheduled: { bg: "bg-blue-50", badge: t('surgery.scheduled'), color: "text-blue-700", borderColor: "border-blue-200" },
     "in-progress": {
       bg: "bg-green-50",
       badge: t('surgery.inProgress'),
       color: "text-green-700",
+      borderColor: "border-green-200"
     },
-    completed: { bg: "bg-emerald-50", badge: t('surgery.completed'), color: "text-emerald-700" },
-    cancelled: { bg: "bg-red-50", badge: t('surgery.cancelled'), color: "text-red-700" },
+    completed: { bg: "bg-slate-50", badge: t('surgery.completed'), color: "text-slate-700", borderColor: "border-slate-200" },
+    cancelled: { bg: "bg-red-50", badge: t('surgery.cancelled'), color: "text-red-700", borderColor: "border-red-200" },
   };
 
   const config = statusConfig[status];
 
   return (
-    <div className={`${config.bg} rounded-lg border border-slate-200 p-6 hover:shadow-md transition-shadow`}>
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900">{patientName}</h3>
-          <p className="text-sm text-slate-500">Case #{id}</p>
+    <div className={`${config.bg} rounded-lg border ${config.borderColor} p-5 hover:shadow-lg transition-all`}>
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-bold text-slate-900 truncate">{patientName}</h3>
+          <p className="text-xs text-slate-500 mt-0.5">#{id}</p>
         </div>
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full bg-white border ${config.color} border-current`}>
+        <Badge className={`${config.bg} ${config.color} border-0 text-xs whitespace-nowrap mr-2`}>
           {config.badge}
-        </span>
+        </Badge>
       </div>
 
-      <h4 className="text-sm font-medium text-slate-900 mb-4">{procedure}</h4>
+      <h4 className="text-sm font-semibold text-slate-800 mb-4 line-clamp-2 min-h-[2.5rem]">{procedure}</h4>
 
-      <div className="space-y-2 text-sm text-slate-600 mb-4">
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            {date}
+      <div className="space-y-2.5 text-sm text-slate-600 mb-4">
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2 text-xs">
+            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>{date}</span>
           </span>
-          <span className="font-medium text-slate-900">{time}</span>
+          <span className="font-semibold text-slate-900 text-xs">{time}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            {t('surgery.operatingRoom')}
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2 text-xs">
+            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>{t('surgery.operatingRoom')}</span>
           </span>
-          <span className="font-medium text-slate-900">{operatingRoom}</span>
+          <span className="font-semibold text-slate-900 text-xs">{operatingRoom}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <Stethoscope className="w-4 h-4" />
-            {t('surgery.surgeon')}
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2 text-xs">
+            <Stethoscope className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="truncate">{surgeon}</span>
           </span>
-          <span className="font-medium text-slate-900">{surgeon}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span>{t('surgery.anesthesia')}</span>
-          <span className="font-medium text-slate-900">{anesthesia}</span>
+        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200">
+          <span className="text-xs">{t('surgery.anesthesia')}</span>
+          <span className="font-semibold text-slate-900 text-xs">{anesthesia}</span>
         </div>
       </div>
 
-      <button className="w-full bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-        {t('common.viewDetails')} <ArrowRight className="w-4 h-4" />
+      <button className="w-full bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm">
+        <span>{t('common.viewDetails')}</span>
+        <ArrowRight className="w-4 h-4" />
       </button>
     </div>
   );
@@ -136,48 +140,55 @@ const OperatingRoomStatus = ({
   const statusConfig = {
     available: {
       color: "text-green-700",
-      bg: "bg-green-50",
+      bg: "bg-green-100",
       badge: t('surgery.available'),
+      borderColor: "border-green-200"
     },
-    "in-use": { color: "text-blue-700", bg: "bg-blue-50", badge: t('surgery.inUse') },
+    "in-use": { 
+      color: "text-blue-700", 
+      bg: "bg-blue-100", 
+      badge: t('surgery.inUse'),
+      borderColor: "border-blue-200"
+    },
     maintenance: {
-      color: "text-yellow-700",
-      bg: "bg-yellow-50",
+      color: "text-orange-700",
+      bg: "bg-orange-100",
       badge: t('rooms.maintenance'),
+      borderColor: "border-orange-200"
     },
   };
 
   const config = statusConfig[status];
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6">
-      <div className="flex items-start justify-between mb-4">
-        <h3 className="text-lg font-semibold text-slate-900">{room}</h3>
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${config.bg} ${config.color}`}>
+    <div className={`bg-white rounded-lg border ${config.borderColor} p-4 hover:shadow-md transition-shadow`}>
+      <div className="flex items-start justify-between mb-3">
+        <h3 className="text-base font-bold text-slate-900">{room}</h3>
+        <Badge className={`${config.bg} ${config.color} border-0 text-xs whitespace-nowrap`}>
           {config.badge}
-        </span>
+        </Badge>
       </div>
 
       {currentSurgery && (
-        <div className="mb-4 pb-4 border-b border-slate-200">
-          <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">
+        <div className="mb-3 pb-3 border-b border-slate-200">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1 font-semibold">
             {t('surgery.currentlyInUse')}
           </p>
-          <p className="font-medium text-slate-900">{currentSurgery}</p>
+          <p className="text-sm font-medium text-slate-900 line-clamp-2">{currentSurgery}</p>
         </div>
       )}
 
       {nextSurgery && (
         <div>
-          <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1 font-semibold">
             {t('surgery.nextSurgery')}
           </p>
-          <p className="font-medium text-slate-900">{nextSurgery}</p>
+          <p className="text-sm font-medium text-slate-900 line-clamp-2">{nextSurgery}</p>
         </div>
       )}
 
       {status === "available" && !currentSurgery && !nextSurgery && (
-        <p className="text-slate-600 text-sm">{t('surgery.noSurgeriesScheduled')}</p>
+        <p className="text-slate-500 text-sm text-center py-2">{t('surgery.noSurgeriesScheduled')}</p>
       )}
     </div>
   );
@@ -189,6 +200,11 @@ export default function Surgery() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("overview");
   const [isScheduleSurgeryDialogOpen, setIsScheduleSurgeryDialogOpen] = useState(false);
+  const [showORManagement, setShowORManagement] = useState(false);
+  const [isAddRoomDialogOpen, setIsAddRoomDialogOpen] = useState(false);
+  const [isAddTeamMemberDialogOpen, setIsAddTeamMemberDialogOpen] = useState(false);
+  const [isAddCareStaffDialogOpen, setIsAddCareStaffDialogOpen] = useState(false);
+  const [isAddEquipmentDialogOpen, setIsAddEquipmentDialogOpen] = useState(false);
   const [surgeryForm, setSurgeryForm] = useState({
     patientId: "",
     patientName: "",
@@ -201,6 +217,15 @@ export default function Surgery() {
     duration: "",
     notes: ""
   });
+
+  const handleORManagementComplete = (data: any) => {
+    console.log("Operating Room Setup:", data);
+    toast({
+      title: t('common.success'),
+      description: t('surgery.or.confirmSetup'),
+    });
+    setShowORManagement(false);
+  };
 
   const surgeries = [
     {
@@ -492,148 +517,163 @@ export default function Surgery() {
 
   return (
     <Layout>
+      {showORManagement && (
+        <OperatingRoomManagement
+          onClose={() => setShowORManagement(false)}
+          onComplete={handleORManagementComplete}
+        />
+      )}
+      
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">
                   {t('navigation.surgery')}
                 </h1>
-                <p className="text-lg text-slate-600">
+                <p className="text-base lg:text-lg text-slate-600">
                   {t('surgery.managementSystem')}
                 </p>
               </div>
-              <Button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300" onClick={() => setIsScheduleSurgeryDialogOpen(true)}>
-                <Plus className="w-5 h-5" />
-                {t('surgery.scheduleSurgery')}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300" 
+                  onClick={() => setShowORManagement(true)}
+                >
+                  <Settings className="w-5 h-5" />
+                  <span>{t('surgery.or.management')}</span>
+                </Button>
+                <Button 
+                  className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300" 
+                  onClick={() => setIsScheduleSurgeryDialogOpen(true)}
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>{t('surgery.scheduleSurgery')}</span>
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Main Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 border-0 shadow-xl">
-              <div className="p-6 text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <Calendar className="w-6 h-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+            <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="p-5 text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                    <Calendar className="w-5 h-5" />
                   </div>
-                  <Badge className="bg-white/20 text-white border-0">اليوم</Badge>
+                  <Badge className="bg-white/20 text-white border-0 text-xs">{t('surgery.today')}</Badge>
                 </div>
-                <p className="text-sm text-blue-100 mb-1">{t('surgery.scheduledSurgeries')}</p>
-                <p className="text-3xl font-bold">{stats.scheduled}</p>
-                <p className="text-xs text-blue-100 mt-2">{t('surgery.operationScheduled')}</p>
+                <p className="text-xl font-bold mb-1">{stats.scheduled}</p>
+                <p className="text-sm text-blue-100">{t('surgery.scheduledSurgeries')}</p>
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-500 to-emerald-600 border-0 shadow-xl">
-              <div className="p-6 text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <Activity className="w-6 h-6" />
+            <Card className="bg-gradient-to-br from-green-500 to-emerald-600 border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="p-5 text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                    <Activity className="w-5 h-5 animate-pulse" />
                   </div>
-                  <Badge className="bg-white/20 text-white border-0 animate-pulse">{t('surgery.live')}</Badge>
+                  <Badge className="bg-white/20 text-white border-0 text-xs animate-pulse">{t('surgery.live')}</Badge>
                 </div>
-                <p className="text-sm text-green-100 mb-1">{t('surgery.inProgress')}</p>
-                <p className="text-3xl font-bold">{stats.inProgress}</p>
-                <p className="text-xs text-green-100 mt-2">{t('surgery.operationOngoing')}</p>
+                <p className="text-xl font-bold mb-1">{stats.inProgress}</p>
+                <p className="text-sm text-green-100">{t('surgery.inProgress')}</p>
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500 to-pink-600 border-0 shadow-xl">
-              <div className="p-6 text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <CheckCircle2 className="w-6 h-6" />
+            <Card className="bg-gradient-to-br from-purple-500 to-pink-600 border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="p-5 text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5" />
                   </div>
-                  <Badge className="bg-white/20 text-white border-0">✓</Badge>
+                  <Badge className="bg-white/20 text-white border-0 text-xs">✓</Badge>
                 </div>
-                <p className="text-sm text-purple-100 mb-1">{t('surgery.completedToday')}</p>
-                <p className="text-3xl font-bold">{stats.completed}</p>
-                <p className="text-xs text-purple-100 mt-2">{t('surgery.operationCompleted')}</p>
+                <p className="text-xl font-bold mb-1">{stats.completed}</p>
+                <p className="text-sm text-purple-100">{t('surgery.completedToday')}</p>
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-orange-500 to-red-600 border-0 shadow-xl">
-              <div className="p-6 text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <Building2 className="w-6 h-6" />
+            <Card className="bg-gradient-to-br from-orange-500 to-red-600 border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="p-5 text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                    <Building2 className="w-5 h-5" />
                   </div>
-                  <Badge className="bg-white/20 text-white border-0">
+                  <Badge className="bg-white/20 text-white border-0 text-xs">
                     {operatingRooms.filter(r => r.status === "in-use").length} {t('surgery.active')}
                   </Badge>
                 </div>
-                <p className="text-sm text-orange-100 mb-1">{t('surgery.operatingRooms')}</p>
-                <p className="text-3xl font-bold">{operatingRooms.length}</p>
-                <p className="text-xs text-orange-100 mt-2">{t('surgery.operatingRoomsCount')}</p>
+                <p className="text-xl font-bold mb-1">{operatingRooms.length}</p>
+                <p className="text-sm text-orange-100">{t('surgery.operatingRooms')}</p>
               </div>
             </Card>
           </div>
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="bg-white/80 backdrop-blur-md border border-slate-200 p-1 rounded-xl shadow-lg">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg px-6">
+            <TabsList className="bg-white border border-slate-200 p-1 rounded-lg shadow-sm w-full flex-wrap h-auto gap-1">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm flex-1 min-w-[140px]">
                 <BarChart3 className="w-4 h-4 ml-2" />
-                {t('surgery.overview')}
+                <span>{t('surgery.overview')}</span>
               </TabsTrigger>
-              <TabsTrigger value="surgeries" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg px-6">
+              <TabsTrigger value="surgeries" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm flex-1 min-w-[140px]">
                 <Scissors className="w-4 h-4 ml-2" />
-                {t('surgery.surgeries')}
+                <span>{t('surgery.surgeries')}</span>
               </TabsTrigger>
-              <TabsTrigger value="rooms" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg px-6">
+              <TabsTrigger value="rooms" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm flex-1 min-w-[140px]">
                 <Building2 className="w-4 h-4 ml-2" />
-                {t('surgery.rooms')}
+                <span>{t('surgery.rooms')}</span>
               </TabsTrigger>
-              <TabsTrigger value="team" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg px-6">
+              <TabsTrigger value="team" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm flex-1 min-w-[140px]">
                 <Users className="w-4 h-4 ml-2" />
-                {t('surgery.team')}
+                <span>{t('surgery.teamTab')}</span>
               </TabsTrigger>
-              <TabsTrigger value="care" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg px-6">
+              <TabsTrigger value="care" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm flex-1 min-w-[140px]">
                 <Heart className="w-4 h-4 ml-2" />
-                {t('surgery.care')}
+                <span>{t('surgery.careTab')}</span>
               </TabsTrigger>
-              <TabsTrigger value="equipment" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg px-6">
+              <TabsTrigger value="equipment" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm flex-1 min-w-[140px]">
                 <Package className="w-4 h-4 ml-2" />
-                {t('surgery.equipment')}
+                <span>{t('surgery.equipmentTab')}</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
               {/* Surgery Statistics */}
-              <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
+              <Card className="bg-white border-slate-200 shadow-lg">
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <TrendingUp className="w-6 h-6 text-blue-600" />
-                    {t('surgery.surgeryStatistics')}
+                  <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-blue-600" />
+                    <span>{t('surgery.surgeryStatistics')}</span>
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {surgeryStats.map((stat, index) => (
-                      <div key={index} className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-5 border border-slate-200">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <p className="font-bold text-slate-900">{stat.type}</p>
-                            <p className="text-xs text-slate-500">{stat.typeEn}</p>
+                      <div key={index} className="bg-slate-50 rounded-lg p-4 border border-slate-200 hover:border-blue-300 transition-colors">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <p className="font-bold text-slate-900 text-base">{stat.type}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{stat.typeEn}</p>
                           </div>
-                          <Badge className="bg-green-100 text-green-700 border-0">
+                          <Badge className="bg-green-100 text-green-700 border-0 text-xs whitespace-nowrap">
                             {stat.successRate}% {t('surgery.successRate')}
                           </Badge>
                         </div>
                         <div className="grid grid-cols-3 gap-3 text-sm">
-                          <div>
-                            <p className="text-slate-600 mb-1">{t('surgery.operationsCount')}</p>
-                            <p className="text-2xl font-bold text-blue-600">{stat.count}</p>
+                          <div className="text-center">
+                            <p className="text-slate-600 mb-1 text-xs">{t('surgery.operationsCount')}</p>
+                            <p className="text-xl font-bold text-blue-600">{stat.count}</p>
                           </div>
-                          <div>
-                            <p className="text-slate-600 mb-1">{t('surgery.avgDuration')}</p>
-                            <p className="text-2xl font-bold text-purple-600">{stat.avgDuration}{t('surgery.hours')}</p>
+                          <div className="text-center">
+                            <p className="text-slate-600 mb-1 text-xs">{t('surgery.avgDuration')}</p>
+                            <p className="text-xl font-bold text-purple-600">{stat.avgDuration} {t('surgery.hours')}</p>
                           </div>
-                          <div>
-                            <p className="text-slate-600 mb-1">{t('surgery.revenue')}</p>
+                          <div className="text-center">
+                            <p className="text-slate-600 mb-1 text-xs">{t('surgery.revenue')}</p>
                             <p className="text-lg font-bold text-green-600">{(stat.revenue / 1000000).toFixed(1)}M</p>
                           </div>
                         </div>
@@ -644,13 +684,13 @@ export default function Surgery() {
               </Card>
 
               {/* Operating Rooms Status */}
-              <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
+              <Card className="bg-white border-slate-200 shadow-lg">
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <Building2 className="w-6 h-6 text-blue-600" />
-                    {t('surgery.operatingRoomsStatus')}
+                  <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-blue-600" />
+                    <span>{t('surgery.operatingRoomsStatus')}</span>
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {operatingRooms.map((room, index) => (
                       <OperatingRoomStatus key={index} {...room} />
                     ))}
@@ -662,23 +702,23 @@ export default function Surgery() {
             {/* Surgeries Tab */}
             <TabsContent value="surgeries" className="space-y-6">
               {/* Search and Filter */}
-              <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
-                <div className="p-6">
-                  <div className="flex flex-col md:flex-row gap-4">
+              <Card className="bg-white border-slate-200 shadow-sm">
+                <div className="p-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input
                         type="text"
                         placeholder={t('common.search')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pr-10 pl-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       />
                     </div>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm min-w-[180px]"
                     >
                       <option value="all">{t('common.all')} {t('common.status')}</option>
                       <option value="scheduled">{t('surgery.scheduled')}</option>
@@ -690,7 +730,7 @@ export default function Surgery() {
               </Card>
 
               {/* Surgeries Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 {filteredSurgeries.map((surgery, index) => (
                   <SurgeryCard key={index} {...surgery} />
                 ))}
@@ -699,8 +739,8 @@ export default function Surgery() {
               {filteredSurgeries.length === 0 && (
                 <Card className="bg-slate-50 border-slate-200">
                   <div className="p-12 text-center">
-                    <Scissors className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                    <p className="text-slate-600">{t('surgery.noSurgeriesFound')}</p>
+                    <Scissors className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                    <p className="text-slate-600 font-medium">{t('surgery.noSurgeriesFound')}</p>
                   </div>
                 </Card>
               )}
@@ -708,6 +748,16 @@ export default function Surgery() {
 
             {/* Rooms Tab */}
             <TabsContent value="rooms" className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">{t('surgery.operatingRooms')}</h3>
+                <Button
+                  onClick={() => setIsAddRoomDialogOpen(true)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  {t('common.add')}
+                </Button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {operatingRooms.map((room, index) => (
                   <Card key={index} className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl overflow-hidden">
@@ -729,55 +779,65 @@ export default function Surgery() {
 
             {/* Team Tab */}
             <TabsContent value="team" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">{t('surgery.teamTab')}</h3>
+                <Button
+                  onClick={() => setIsAddTeamMemberDialogOpen(true)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  {t('common.add')}
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {surgicalTeam.map((member) => (
-                  <Card key={member.id} className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                  <Card key={member.id} className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="p-5">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md flex-shrink-0">
                             {member.name.split(' ')[1].charAt(0)}
                           </div>
-                          <div>
-                            <h3 className="font-bold text-slate-900 text-lg">{member.name}</h3>
-                            <p className="text-sm text-slate-600">{member.role}</p>
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-slate-900 text-base truncate">{member.name}</h3>
+                            <p className="text-xs text-slate-600 mt-0.5">{member.role}</p>
                           </div>
                         </div>
                         <Badge className={
                           member.availability === "متاح" 
-                            ? "bg-green-100 text-green-700 border-0" 
-                            : "bg-orange-100 text-orange-700 border-0"
+                            ? "bg-green-100 text-green-700 border-0 text-xs whitespace-nowrap" 
+                            : "bg-orange-100 text-orange-700 border-0 text-xs whitespace-nowrap"
                         }>
                           {member.availability}
                         </Badge>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="text-center p-3 bg-blue-50 rounded-lg">
-                          <p className="text-xs text-blue-600 mb-1">{t('surgery.experience')}</p>
-                          <p className="text-2xl font-bold text-blue-700">{member.experience}</p>
-                          <p className="text-xs text-blue-600">{t('surgery.year')}</p>
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        <div className="text-center p-2.5 bg-blue-50 rounded-lg border border-blue-100">
+                          <p className="text-[10px] text-blue-600 mb-1 font-semibold">{t('surgery.experience')}</p>
+                          <p className="text-xl font-bold text-blue-700">{member.experience}</p>
+                          <p className="text-[10px] text-blue-600">{t('surgery.year')}</p>
                         </div>
-                        <div className="text-center p-3 bg-green-50 rounded-lg">
-                          <p className="text-xs text-green-600 mb-1">{t('surgery.todayOperations')}</p>
-                          <p className="text-2xl font-bold text-green-700">{member.surgeriesToday}</p>
-                          <p className="text-xs text-green-600">{t('surgery.operation')}</p>
+                        <div className="text-center p-2.5 bg-green-50 rounded-lg border border-green-100">
+                          <p className="text-[10px] text-green-600 mb-1 font-semibold">{t('surgery.todayOperations')}</p>
+                          <p className="text-xl font-bold text-green-700">{member.surgeriesToday}</p>
+                          <p className="text-[10px] text-green-600">{t('surgery.operation')}</p>
                         </div>
-                        <div className="text-center p-3 bg-purple-50 rounded-lg">
-                          <p className="text-xs text-purple-600 mb-1">{t('surgery.total')}</p>
-                          <p className="text-2xl font-bold text-purple-700">{member.totalSurgeries}</p>
-                          <p className="text-xs text-purple-600">{t('surgery.operation')}</p>
+                        <div className="text-center p-2.5 bg-purple-50 rounded-lg border border-purple-100">
+                          <p className="text-[10px] text-purple-600 mb-1 font-semibold">{t('surgery.total')}</p>
+                          <p className="text-xl font-bold text-purple-700">{member.totalSurgeries}</p>
+                          <p className="text-[10px] text-purple-600">{t('surgery.operation')}</p>
                         </div>
                       </div>
 
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center justify-between py-2 border-t border-slate-200">
-                          <span className="text-slate-600">{t('surgery.specialization')}</span>
-                          <span className="font-semibold text-slate-900">{member.specialization}</span>
+                          <span className="text-slate-600 text-xs">{t('surgery.specialization')}</span>
+                          <span className="font-semibold text-slate-900 text-xs">{member.specialization}</span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-t border-slate-200">
-                          <span className="text-slate-600">{t('surgery.nextOperation')}</span>
-                          <span className="font-semibold text-slate-900">{member.nextSurgery}</span>
+                          <span className="text-slate-600 text-xs">{t('surgery.nextOperation')}</span>
+                          <span className="font-semibold text-slate-900 text-xs">{member.nextSurgery}</span>
                         </div>
                       </div>
                     </div>
@@ -788,6 +848,16 @@ export default function Surgery() {
 
             {/* Care Tab */}
             <TabsContent value="care" className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">{t('surgery.careTab')}</h3>
+                <Button
+                  onClick={() => setIsAddCareStaffDialogOpen(true)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  {t('common.add')}
+                </Button>
+              </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {prePostOpCare.map((patient, index) => (
                   <Card key={index} className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
@@ -864,6 +934,16 @@ export default function Surgery() {
 
             {/* Equipment Tab */}
             <TabsContent value="equipment" className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">{t('surgery.equipmentTab')}</h3>
+                <Button
+                  onClick={() => setIsAddEquipmentDialogOpen(true)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  {t('common.add')}
+                </Button>
+              </div>
               {/* Equipment List */}
               <Card className="bg-white/80 backdrop-blur-md border-slate-200 shadow-xl">
                 <div className="p-6">
@@ -1109,6 +1189,321 @@ export default function Surgery() {
               });
             }}>
               {t('common.schedule')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Operating Room Dialog */}
+      <Dialog open={isAddRoomDialogOpen} onOpenChange={setIsAddRoomDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-blue-700 flex items-center gap-2">
+              <Building2 className="w-6 h-6" />
+              إضافة غرفة عمليات جديدة
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="room-name">اسم الغرفة</Label>
+                <Input id="room-name" placeholder="غرفة العمليات 5" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="room-number">رقم الغرفة</Label>
+                <Input id="room-number" placeholder="OR-5" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="building">المبنى</Label>
+                <Select>
+                  <SelectTrigger id="building">
+                    <SelectValue placeholder="اختر المبنى" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="main">المبنى الرئيسي</SelectItem>
+                    <SelectItem value="north">المبنى الشمالي</SelectItem>
+                    <SelectItem value="south">المبنى الجنوبي</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="floor">الطابق</Label>
+                <Input id="floor" type="number" placeholder="3" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="capacity">السعة</Label>
+              <Input id="capacity" type="number" placeholder="10" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="room-notes">ملاحظات</Label>
+              <Textarea id="room-notes" rows={3} placeholder="معلومات إضافية عن الغرفة..." />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddRoomDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+              toast({
+                title: "تم الإضافة بنجاح",
+                description: "تم إضافة غرفة العمليات الجديدة",
+              });
+              setIsAddRoomDialogOpen(false);
+            }}>
+              {t('common.add')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Team Member Dialog */}
+      <Dialog open={isAddTeamMemberDialogOpen} onOpenChange={setIsAddTeamMemberDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-blue-700 flex items-center gap-2">
+              <Users className="w-6 h-6" />
+              إضافة عضو للفريق الجراحي
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="member-name">الاسم الكامل</Label>
+                <Input id="member-name" placeholder="د. أحمد محمد" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="member-role">الدور</Label>
+                <Select>
+                  <SelectTrigger id="member-role">
+                    <SelectValue placeholder="اختر الدور" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="surgeon">جراح رئيسي</SelectItem>
+                    <SelectItem value="assistant">جراح مساعد</SelectItem>
+                    <SelectItem value="anesthesiologist">طبيب تخدير</SelectItem>
+                    <SelectItem value="nurse">ممرض جراحة</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="specialization">التخصص</Label>
+                <Input id="specialization" placeholder="جراحة القلب" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="experience">سنوات الخبرة</Label>
+                <Input id="experience" type="number" placeholder="10" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="license">رقم الرخصة</Label>
+                <Input id="license" placeholder="MED-12345" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">رقم الهاتف</Label>
+                <Input id="phone" placeholder="+966 50 123 4567" />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddTeamMemberDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+              toast({
+                title: "تم الإضافة بنجاح",
+                description: "تم إضافة عضو جديد للفريق الجراحي",
+              });
+              setIsAddTeamMemberDialogOpen(false);
+            }}>
+              {t('common.add')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Care Staff Dialog */}
+      <Dialog open={isAddCareStaffDialogOpen} onOpenChange={setIsAddCareStaffDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-blue-700 flex items-center gap-2">
+              <Heart className="w-6 h-6" />
+              إضافة طاقم رعاية طبية
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="care-name">الاسم الكامل</Label>
+                <Input id="care-name" placeholder="ممرض/ة فاطمة أحمد" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="care-role">الدور</Label>
+                <Select>
+                  <SelectTrigger id="care-role">
+                    <SelectValue placeholder="اختر الدور" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="icu">ممرض عناية مركزة</SelectItem>
+                    <SelectItem value="recovery">ممرض إفاقة</SelectItem>
+                    <SelectItem value="assistant">مساعد رعاية</SelectItem>
+                    <SelectItem value="physio">أخصائي علاج طبيعي</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="shift">الدوام</Label>
+                <Select>
+                  <SelectTrigger id="shift">
+                    <SelectValue placeholder="اختر الدوام" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="morning">صباحي (7 ص - 3 م)</SelectItem>
+                    <SelectItem value="evening">مسائي (3 م - 11 م)</SelectItem>
+                    <SelectItem value="night">ليلي (11 م - 7 ص)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="care-experience">سنوات الخبرة</Label>
+                <Input id="care-experience" type="number" placeholder="5" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="care-phone">رقم الهاتف</Label>
+              <Input id="care-phone" placeholder="+966 50 123 4567" />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddCareStaffDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+              toast({
+                title: "تم الإضافة بنجاح",
+                description: "تم إضافة طاقم الرعاية الطبية",
+              });
+              setIsAddCareStaffDialogOpen(false);
+            }}>
+              {t('common.add')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Equipment Dialog */}
+      <Dialog open={isAddEquipmentDialogOpen} onOpenChange={setIsAddEquipmentDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-blue-700 flex items-center gap-2">
+              <Package className="w-6 h-6" />
+              إضافة معدات طبية
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="equipment-name">اسم المعدة</Label>
+                <Input id="equipment-name" placeholder="جهاز التخدير" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="equipment-name-en">الاسم بالإنجليزية</Label>
+                <Input id="equipment-name-en" placeholder="Anesthesia Machine" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="equipment-category">الفئة</Label>
+                <Select>
+                  <SelectTrigger id="equipment-category">
+                    <SelectValue placeholder="اختر الفئة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="anesthesia">أجهزة تخدير</SelectItem>
+                    <SelectItem value="monitoring">أجهزة مراقبة</SelectItem>
+                    <SelectItem value="surgical">أدوات جراحية</SelectItem>
+                    <SelectItem value="imaging">أجهزة تصوير</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="equipment-room">الغرفة</Label>
+                <Select>
+                  <SelectTrigger id="equipment-room">
+                    <SelectValue placeholder="اختر الغرفة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="OR-1">OR-1</SelectItem>
+                    <SelectItem value="OR-2">OR-2</SelectItem>
+                    <SelectItem value="OR-3">OR-3</SelectItem>
+                    <SelectItem value="OR-4">OR-4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="serial-number">الرقم التسلسلي</Label>
+                <Input id="serial-number" placeholder="SN-2024-001" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="purchase-date">تاريخ الشراء</Label>
+                <Input id="purchase-date" type="date" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="last-maintenance">آخر صيانة</Label>
+                <Input id="last-maintenance" type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="next-maintenance">الصيانة القادمة</Label>
+                <Input id="next-maintenance" type="date" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="equipment-notes">ملاحظات</Label>
+              <Textarea id="equipment-notes" rows={3} placeholder="معلومات إضافية..." />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddEquipmentDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+              toast({
+                title: "تم الإضافة بنجاح",
+                description: "تم إضافة المعدات الطبية الجديدة",
+              });
+              setIsAddEquipmentDialogOpen(false);
+            }}>
+              {t('common.add')}
             </Button>
           </DialogFooter>
         </DialogContent>
